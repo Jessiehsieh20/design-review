@@ -509,7 +509,6 @@ document.addEventListener("change", e => {
   if (e.target.matches('input[type="checkbox"][data-score]')) recalc();
 });
 document.getElementById("projectName").addEventListener("input", save);
-document.getElementById("reviewer").addEventListener("input", save);
 document.getElementById("checkAll").addEventListener("click", () => {
   checkboxes().forEach(cb => cb.checked = true); recalc();
 });
@@ -519,7 +518,6 @@ document.getElementById("uncheckAll").addEventListener("click", () => {
 
 document.getElementById("exportBtn").addEventListener("click", () => {
   const project = document.getElementById("projectName").value || "未命名專案";
-  const reviewer = document.getElementById("reviewer").value || "未填寫";
   const total = document.getElementById("totalScore").textContent;
   const g = gradeOf(+total);
   const date = new Date().toLocaleString("zh-TW");
@@ -527,7 +525,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
     `平面設計評分結果`,
     `============================`,
     `專案：${project}`,
-    `審核人：${reviewer}`,
     `日期：${date}`,
     ``,
     `最終得分：${total} / 100`,
