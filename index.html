@@ -11,10 +11,12 @@
     --border: #e3e6eb;
     --text: #1f2937;
     --muted: #6b7280;
-    --primary: #2563eb;
-    --primary-light: #dbeafe;
-    --good: #16a34a;
-    --ok: #2563eb;
+    --self: #2563eb;
+    --self-light: #dbeafe;
+    --self-tint: #eff6ff;
+    --sup: #16a34a;
+    --sup-light: #dcfce7;
+    --sup-tint: #f0fdf4;
     --warn: #f59e0b;
     --bad: #dc2626;
     --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
@@ -31,9 +33,9 @@
   }
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: 24px;
-    max-width: 1240px;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 28px 24px 80px;
   }
@@ -58,7 +60,7 @@
   .toolbar {
     grid-column: 1 / -1;
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     flex-wrap: wrap;
     margin-bottom: 4px;
@@ -73,22 +75,44 @@
     cursor: pointer;
     font-size: 14px;
     transition: all 0.15s;
+    font-family: inherit;
   }
   .btn:hover { background: #f3f4f6; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .btn-primary {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--self);
+    border-color: var(--self);
     color: #fff;
   }
   .btn-primary:hover { background: #1d4ed8; }
+  .btn-block { width: 100%; margin-top: 14px; }
   .input {
     border: 1px solid var(--border);
     background: var(--card);
     padding: 8px 12px;
     border-radius: 8px;
     font-size: 14px;
-    min-width: 200px;
+    min-width: 240px;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
+  .input:focus {
+    outline: none;
+    border-color: var(--self);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  }
+  .input.invalid {
+    border-color: var(--bad);
+    background: #fef2f2;
+  }
+  .input.invalid:focus {
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.15);
+  }
+  .required-mark {
+    color: var(--bad);
+    margin-left: 2px;
+  }
+
   .category {
     background: var(--card);
     border: 1px solid var(--border);
@@ -102,72 +126,125 @@
     background: linear-gradient(180deg, #fafbfc, #f4f6f8);
     border-bottom: 1px solid var(--border);
   }
+  .category-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
   .category-title {
     font-size: 16px;
     font-weight: 600;
     margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
   }
   .category-meta {
     font-size: 13px;
     color: var(--muted);
     margin-top: 4px;
   }
-  .category-progress {
-    font-variant-numeric: tabular-nums;
-    color: var(--primary);
-    font-weight: 600;
+  .category-scores {
     margin-left: auto;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    gap: 12px;
   }
+  .category-scores .self-s { color: var(--self); font-weight: 600; }
+  .category-scores .sup-s { color: var(--sup); font-weight: 600; }
+  .col-headers {
+    display: grid;
+    grid-template-columns: 54px 54px 1fr 52px;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .col-headers .col-self { color: var(--self); text-align: center; }
+  .col-headers .col-sup { color: var(--sup); text-align: center; }
+  .col-headers .col-score { text-align: right; }
   .item {
     display: grid;
-    grid-template-columns: 28px 1fr 44px;
+    grid-template-columns: 54px 54px 1fr 52px;
     align-items: center;
     gap: 12px;
     padding: 11px 18px;
     border-top: 1px solid #f1f3f5;
-    cursor: pointer;
+    cursor: default;
     transition: background 0.1s;
+    position: relative;
   }
   .item:first-of-type { border-top: 0; }
-  .item:hover { background: #fafbfc; }
-  .item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+  .item .cb-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .item .cb-wrap input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    accent-color: var(--primary);
+    margin: 0;
+  }
+  .item .self-check { accent-color: var(--self); }
+  .item .sup-check { accent-color: var(--sup); }
+  .item .self-cell {
+    background: var(--self-tint);
+    border-radius: 6px;
+    padding: 4px 0;
+  }
+  .item .sup-cell {
+    background: var(--sup-tint);
+    border-radius: 6px;
+    padding: 4px 0;
   }
   .item-label {
     font-size: 14px;
     line-height: 1.5;
-  }
-  .item.checked {
-    background: #fafbfc;
-  }
-  .item.checked .item-label {
-    color: #b6bcc4;
-    text-decoration: line-through;
-    text-decoration-color: #d1d5db;
-  }
-  .item.checked .item-score { color: #c7cbd1; }
-  .item.unchecked .item-label {
     color: var(--text);
-    font-weight: 500;
   }
-  .item.unchecked {
-    background: #fff7ed;
-    border-left: 3px solid #f59e0b;
-  }
-  .item.unchecked:hover { background: #ffedd5; }
   .item-score {
     text-align: right;
     font-variant-numeric: tabular-nums;
     color: var(--muted);
     font-size: 13px;
   }
-  .item.unchecked .item-score { color: #d97706; font-weight: 600; }
+  .item.flag-incomplete {
+    background: #fff7ed;
+    box-shadow: inset 3px 0 0 var(--warn);
+  }
+  .item.flag-incomplete .item-label {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .item.flag-incomplete .item-score {
+    color: #d97706;
+    font-weight: 600;
+  }
+  .item.flag-passed .item-label {
+    color: #b6bcc4;
+    text-decoration: line-through;
+    text-decoration-color: #d1d5db;
+  }
+  .item.flag-passed .item-score {
+    color: #c7cbd1;
+  }
+  .item.flag-disagree {
+    background: #fef2f2;
+    box-shadow: inset 3px 0 0 var(--bad);
+  }
+  .item.flag-disagree .item-label {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .item.flag-disagree .item-score {
+    color: var(--bad);
+    font-weight: 600;
+  }
+
   .sidebar {
     position: sticky;
     top: 20px;
@@ -180,172 +257,147 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 18px;
     box-shadow: var(--shadow);
   }
+  .dual-score {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .score-block {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .score-block.self { background: var(--self-tint); border-color: var(--self-light); }
+  .score-block.sup { background: var(--sup-tint); border-color: var(--sup-light); }
   .score-label {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
-    margin: 0 0 6px;
+    margin: 0 0 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
   }
+  .score-block.self .score-label { color: var(--self); }
+  .score-block.sup .score-label { color: var(--sup); }
   .score-value {
-    font-size: 56px;
+    font-size: 38px;
     font-weight: 700;
-    line-height: 1;
+    line-height: 1.05;
     font-variant-numeric: tabular-nums;
-    margin: 0;
   }
+  .score-block.self .score-value { color: var(--self); }
+  .score-block.sup .score-value { color: var(--sup); }
   .score-suffix {
-    font-size: 18px;
+    display: block;
+    font-size: 12px;
     color: var(--muted);
-    font-weight: 400;
-  }
-  .progress-bar {
-    height: 8px;
-    background: #eef0f3;
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 14px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--primary);
-    transition: width 0.25s ease, background 0.25s ease;
+    margin-top: 2px;
   }
   .grade-badge {
     display: inline-block;
-    padding: 6px 12px;
+    padding: 3px 10px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    margin-top: 14px;
-    background: var(--primary-light);
-    color: var(--primary);
+    margin-top: 8px;
+    background: #e5e7eb;
+    color: var(--muted);
   }
   .grade-desc {
     color: var(--muted);
-    font-size: 13px;
-    margin-top: 6px;
+    font-size: 11px;
+    margin-top: 4px;
+    min-height: 14px;
   }
   .info-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px 18px;
+    padding: 14px 16px;
     box-shadow: var(--shadow);
-  }
-  .info-card h3 {
-    font-size: 14px;
-    margin: 0 0 10px;
-    color: var(--text);
-  }
-  .info-card ul {
-    margin: 0;
-    padding-left: 18px;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
     line-height: 1.7;
   }
-  .grade-table { width: 100%; font-size: 13px; }
-  .grade-table td { padding: 4px 0; vertical-align: top; }
-  .grade-table td:first-child {
-    color: var(--text);
-    font-weight: 600;
-    white-space: nowrap;
-    padding-right: 10px;
-  }
-  .grade-table td:last-child { color: var(--muted); }
-  .danger-list li { color: var(--bad); }
-  .meta-input {
-    width: 100%;
-    margin-bottom: 8px;
-  }
-  details.usage {
-    grid-column: 1 / -1;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 0;
-    box-shadow: var(--shadow);
-    margin-top: 8px;
-  }
-  details.usage summary {
-    padding: 14px 18px;
-    cursor: pointer;
-    font-weight: 600;
-    list-style: none;
-  }
-  details.usage summary::-webkit-details-marker { display: none; }
-  details.usage summary::before {
-    content: "▸";
-    display: inline-block;
-    margin-right: 8px;
-    transition: transform 0.2s;
-  }
-  details.usage[open] summary::before { transform: rotate(90deg); }
-  details.usage .usage-body {
-    padding: 0 18px 18px;
+  .info-card strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 13px; }
+  .info-card .row { display: flex; justify-content: space-between; gap: 8px; }
+  .info-card .row .label { color: var(--text); white-space: nowrap; }
+
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    padding: 12px 22px;
+    background: #1f2937;
+    color: #fff;
+    border-radius: 10px;
     font-size: 14px;
-    color: var(--text);
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
   }
-  details.usage h4 {
-    margin: 16px 0 6px;
-    font-size: 14px;
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
-  details.usage table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  details.usage td { padding: 4px 8px 4px 0; vertical-align: top; }
-  details.usage td:first-child { color: var(--primary); font-weight: 600; white-space: nowrap; }
-  @media print {
-    .toolbar, .sidebar { display: none; }
-    .layout { display: block; }
-    .item { break-inside: avoid; }
-  }
+  .toast.error { background: var(--bad); }
+  .toast.success { background: var(--sup); }
 </style>
 </head>
 <body>
 <div class="layout">
   <header class="page-header">
     <h1>內部平面設計審核評分表</h1>
-    <p>起始分數 0 分，每勾選一項即累計該項分數，總分 100 分。請依下方項目逐一檢視設計稿。</p>
+    <p>每項勾選即累計分數。請組員自評後產生覆核連結傳給主管，主管在原連結上覆核（預設與自評同步，僅取消不認同的項目即可）。</p>
   </header>
 
   <div class="toolbar">
-    <input id="projectName" class="input" placeholder="專案名稱（選填）">
+    <input id="projectName" class="input" placeholder="素材名稱（必填）" required>
     <button class="btn" id="checkAll">全部勾選</button>
     <button class="btn" id="uncheckAll">全部取消</button>
-    <button class="btn btn-primary" id="exportImageBtn">下載結果為圖檔</button>
-    <button class="btn" id="exportBtn">匯出 TXT</button>
-    <button class="btn" onclick="window.print()">列印 / 存 PDF</button>
+    <button class="btn btn-primary" id="shareBtn">產生覆核連結</button>
   </div>
 
   <main id="categories"></main>
 
   <aside class="sidebar">
     <div class="score-card">
-      <p class="score-label">最終得分</p>
-      <div>
-        <span class="score-value" id="totalScore">0</span>
-        <span class="score-suffix">/ 100</span>
+      <div class="dual-score">
+        <div class="score-block self">
+          <div class="score-label">組員自評</div>
+          <div class="score-value" id="selfScore">0</div>
+          <span class="score-suffix">/ 100 分</span>
+          <div><span class="grade-badge" id="selfGrade">—</span></div>
+          <div class="grade-desc" id="selfDesc">尚未開始</div>
+        </div>
+        <div class="score-block sup">
+          <div class="score-label">主管覆核</div>
+          <div class="score-value" id="supScore">0</div>
+          <span class="score-suffix">/ 100 分</span>
+          <div><span class="grade-badge" id="supGrade">—</span></div>
+          <div class="grade-desc" id="supDesc">尚未覆核</div>
+        </div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div>
-        <span class="grade-badge" id="gradeBadge">—</span>
-      </div>
-      <div class="grade-desc" id="gradeDesc">尚未開始評分</div>
+      <button class="btn btn-block" id="exportImageBtn">下載結果為圖檔</button>
     </div>
 
     <div class="info-card">
-      <h3>等級判定</h3>
-      <table class="grade-table">
-        <tr><td>90–100 分</td><td>優：可直接交付</td></tr>
-        <tr><td>75–89 分</td><td>良：小幅修改即可交付</td></tr>
-        <tr><td>60–74 分</td><td>普：中度修改，需局部大修</td></tr>
-        <tr><td>低於 60 分</td><td>不佳：整體退件重做</td></tr>
-      </table>
+      <strong>等級判定</strong>
+      <div class="row"><span class="label">90–100</span><span>優：可直接交付</span></div>
+      <div class="row"><span class="label">75–89</span><span>良：小幅修改</span></div>
+      <div class="row"><span class="label">60–74</span><span>普：中度修改</span></div>
+      <div class="row"><span class="label">&lt; 60</span><span>不佳：退件重做</span></div>
     </div>
-
   </aside>
 </div>
+
+<div id="toast" class="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script>
@@ -412,8 +464,6 @@ const data = [
   },
 ];
 
-const STORAGE_KEY = "design-review-state-v2";
-
 const root = document.getElementById("categories");
 data.forEach((cat, ci) => {
   const catEl = document.createElement("section");
@@ -421,20 +471,37 @@ data.forEach((cat, ci) => {
   const catMax = cat.items.reduce((s, [, p]) => s + p, 0);
   catEl.innerHTML = `
     <div class="category-header">
-      <h2 class="category-title">
-        <span>${cat.title}</span>
-        <span class="category-progress" data-cat="${ci}">0 / ${catMax}</span>
-      </h2>
+      <div class="category-title-row">
+        <h2 class="category-title">${cat.title}</h2>
+        <div class="category-scores">
+          <span><span class="self-s" data-cat-self="${ci}">0</span> <span style="color:#9ca3af">/ ${catMax}</span></span>
+          <span style="color:#cbd5e1">·</span>
+          <span><span class="sup-s" data-cat-sup="${ci}">0</span> <span style="color:#9ca3af">/ ${catMax}</span></span>
+        </div>
+      </div>
       <div class="category-meta">${cat.desc}</div>
+    </div>
+    <div class="col-headers">
+      <span class="col-self">自評</span>
+      <span class="col-sup">覆核</span>
+      <span>檢查項目</span>
+      <span class="col-score">分數</span>
     </div>
   `;
   cat.items.forEach(([label, score], ii) => {
-    const id = `c${ci}_${ii}`;
-    const row = document.createElement("label");
-    row.className = "item unchecked";
-    row.htmlFor = id;
+    const selfId = `self_${ci}_${ii}`;
+    const supId = `sup_${ci}_${ii}`;
+    const row = document.createElement("div");
+    row.className = "item";
+    row.dataset.cat = ci;
+    row.dataset.idx = ii;
     row.innerHTML = `
-      <input type="checkbox" id="${id}" data-cat="${ci}" data-score="${score}">
+      <label class="cb-wrap self-cell" for="${selfId}">
+        <input type="checkbox" id="${selfId}" class="self-check" data-cat="${ci}" data-idx="${ii}" data-score="${score}">
+      </label>
+      <label class="cb-wrap sup-cell" for="${supId}">
+        <input type="checkbox" id="${supId}" class="sup-check" data-cat="${ci}" data-idx="${ii}" data-score="${score}">
+      </label>
       <span class="item-label">${label}</span>
       <span class="item-score">+${score}</span>
     `;
@@ -443,118 +510,163 @@ data.forEach((cat, ci) => {
   root.appendChild(catEl);
 });
 
-const checkboxes = () => Array.from(document.querySelectorAll('input[type="checkbox"][data-score]'));
-
 function gradeOf(score) {
-  if (score >= 90) return { label: "優", desc: "可直接交付", color: "var(--good)", bg: "#dcfce7" };
-  if (score >= 75) return { label: "良", desc: "小幅修改即可交付", color: "var(--ok)", bg: "#dbeafe" };
-  if (score >= 60) return { label: "普", desc: "中度修改，需局部大修", color: "var(--warn)", bg: "#fef3c7" };
-  return { label: "不佳", desc: "整體退件重做", color: "var(--bad)", bg: "#fee2e2" };
+  if (score >= 90) return { label: "優", desc: "可直接交付", color: "#16a34a", bg: "#dcfce7" };
+  if (score >= 75) return { label: "良", desc: "小幅修改即可交付", color: "#2563eb", bg: "#dbeafe" };
+  if (score >= 60) return { label: "普", desc: "中度修改，需局部大修", color: "#f59e0b", bg: "#fef3c7" };
+  return { label: "不佳", desc: "整體退件重做", color: "#dc2626", bg: "#fee2e2" };
 }
 
 function recalc() {
-  let total = 0;
-  const catTotals = data.map(c => ({ got: 0, max: c.items.reduce((s, [, p]) => s + p, 0) }));
-  checkboxes().forEach(cb => {
-    const ci = +cb.dataset.cat;
-    const sc = +cb.dataset.score;
-    const row = cb.closest(".item");
-    if (cb.checked) {
-      total += sc;
-      catTotals[ci].got += sc;
-      row.classList.add("checked");
-      row.classList.remove("unchecked");
-    } else {
-      row.classList.add("unchecked");
-      row.classList.remove("checked");
-    }
+  let selfTotal = 0, supTotal = 0;
+  const catSelf = data.map(() => 0);
+  const catSup = data.map(() => 0);
+  data.forEach((cat, ci) => {
+    cat.items.forEach((it, ii) => {
+      const self = document.getElementById(`self_${ci}_${ii}`).checked;
+      const sup = document.getElementById(`sup_${ci}_${ii}`).checked;
+      if (self) { selfTotal += it[1]; catSelf[ci] += it[1]; }
+      if (sup) { supTotal += it[1]; catSup[ci] += it[1]; }
+      const row = document.querySelector(`.item[data-cat="${ci}"][data-idx="${ii}"]`);
+      row.classList.remove("flag-incomplete", "flag-passed", "flag-disagree");
+      if (self && sup) row.classList.add("flag-passed");
+      else if (self && !sup) row.classList.add("flag-disagree");
+      else row.classList.add("flag-incomplete");
+    });
   });
-  document.getElementById("totalScore").textContent = total;
-  const fill = document.getElementById("progressFill");
-  fill.style.width = total + "%";
-  const g = gradeOf(total);
-  fill.style.background = g.color;
-  const badge = document.getElementById("gradeBadge");
-  badge.textContent = `${g.label}（${total} 分）`;
-  badge.style.background = g.bg;
-  badge.style.color = g.color;
-  document.getElementById("gradeDesc").textContent = g.desc;
-  document.querySelectorAll(".category-progress").forEach(el => {
-    const ci = +el.dataset.cat;
-    el.textContent = `${catTotals[ci].got} / ${catTotals[ci].max}`;
+  document.getElementById("selfScore").textContent = selfTotal;
+  document.getElementById("supScore").textContent = supTotal;
+  applyGrade("selfScore", "selfGrade", "selfDesc", selfTotal, "尚未開始");
+  applyGrade("supScore", "supGrade", "supDesc", supTotal, "尚未覆核");
+  document.querySelectorAll("[data-cat-self]").forEach(el => {
+    el.textContent = catSelf[+el.dataset.catSelf];
+  });
+  document.querySelectorAll("[data-cat-sup]").forEach(el => {
+    el.textContent = catSup[+el.dataset.catSup];
   });
   save();
 }
 
+function applyGrade(scoreId, gradeId, descId, score, emptyDesc) {
+  const g = gradeOf(score);
+  const badge = document.getElementById(gradeId);
+  const desc = document.getElementById(descId);
+  if (score === 0) {
+    badge.textContent = "—";
+    badge.style.background = "#e5e7eb";
+    badge.style.color = "var(--muted)";
+    desc.textContent = emptyDesc;
+  } else {
+    badge.textContent = g.label;
+    badge.style.background = g.bg;
+    badge.style.color = g.color;
+    desc.textContent = g.desc;
+  }
+}
+
+document.addEventListener("change", e => {
+  if (e.target.classList.contains("self-check")) {
+    const ci = e.target.dataset.cat;
+    const ii = e.target.dataset.idx;
+    document.getElementById(`sup_${ci}_${ii}`).checked = e.target.checked;
+    recalc();
+  } else if (e.target.classList.contains("sup-check")) {
+    recalc();
+  }
+});
+
+document.getElementById("checkAll").addEventListener("click", () => {
+  document.querySelectorAll(".self-check").forEach(cb => cb.checked = true);
+  document.querySelectorAll(".sup-check").forEach(cb => cb.checked = true);
+  recalc();
+});
+document.getElementById("uncheckAll").addEventListener("click", () => {
+  document.querySelectorAll(".self-check").forEach(cb => cb.checked = false);
+  document.querySelectorAll(".sup-check").forEach(cb => cb.checked = false);
+  recalc();
+});
+
+document.getElementById("projectName").addEventListener("input", () => {
+  document.getElementById("projectName").classList.remove("invalid");
+  save();
+});
+
+const STORAGE_KEY = "design-review-state-v3";
 function save() {
   const state = {
     project: document.getElementById("projectName").value,
-    checks: checkboxes().map(cb => cb.checked),
+    self: getBits("self-check"),
+    sup: getBits("sup-check"),
   };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
 }
-
-function load() {
+function getBits(cls) {
+  return Array.from(document.querySelectorAll("." + cls)).map(cb => cb.checked ? "1" : "0").join("");
+}
+function setBits(cls, bits) {
+  const cbs = document.querySelectorAll("." + cls);
+  cbs.forEach((cb, i) => { cb.checked = bits[i] === "1"; });
+}
+function loadLocal() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const state = JSON.parse(raw);
-    document.getElementById("projectName").value = state.project || "";
-    const cbs = checkboxes();
-    (state.checks || []).forEach((v, i) => { if (cbs[i]) cbs[i].checked = v; });
+    if (state.project) document.getElementById("projectName").value = state.project;
+    if (state.self) setBits("self-check", state.self);
+    if (state.sup) setBits("sup-check", state.sup);
   } catch (e) {}
 }
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has("p") && !params.has("s")) return false;
+  if (params.has("p")) document.getElementById("projectName").value = params.get("p");
+  if (params.has("s")) setBits("self-check", params.get("s"));
+  if (params.has("v")) setBits("sup-check", params.get("v"));
+  return true;
+}
 
-document.addEventListener("change", e => {
-  if (e.target.matches('input[type="checkbox"][data-score]')) recalc();
-});
-document.getElementById("projectName").addEventListener("input", save);
-document.getElementById("checkAll").addEventListener("click", () => {
-  checkboxes().forEach(cb => cb.checked = true); recalc();
-});
-document.getElementById("uncheckAll").addEventListener("click", () => {
-  checkboxes().forEach(cb => cb.checked = false); recalc();
-});
+function validateProject(actionName) {
+  const input = document.getElementById("projectName");
+  if (!input.value.trim()) {
+    input.classList.add("invalid");
+    input.focus();
+    showToast(`請先填寫素材名稱才能${actionName}`, "error");
+    return false;
+  }
+  input.classList.remove("invalid");
+  return true;
+}
 
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const project = document.getElementById("projectName").value || "未命名專案";
-  const total = document.getElementById("totalScore").textContent;
-  const g = gradeOf(+total);
-  const date = new Date().toLocaleString("zh-TW");
-  const lines = [
-    `平面設計評分結果`,
-    `============================`,
-    `專案：${project}`,
-    `日期：${date}`,
-    ``,
-    `最終得分：${total} / 100`,
-    `等級判定：${g.label}（${g.desc}）`,
-    ``,
-    `--- 明細 ---`,
-  ];
-  data.forEach((cat, ci) => {
-    lines.push("");
-    lines.push(`【${cat.title}】`);
-    cat.items.forEach((it, ii) => {
-      const cb = document.getElementById(`c${ci}_${ii}`);
-      const mark = cb.checked ? "[V]" : "[ ]";
-      lines.push(`${mark} ${it[0]}  (+${it[1]})`);
-    });
-  });
-  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `設計評分_${project}_${total}分.txt`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+function showToast(msg, type) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast show" + (type ? " " + type : "");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { el.className = "toast"; }, 2600);
+}
+
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  if (!validateProject("產生覆核連結")) return;
+  const params = new URLSearchParams();
+  params.set("p", document.getElementById("projectName").value.trim());
+  params.set("s", getBits("self-check"));
+  params.set("v", getBits("sup-check"));
+  const url = `${location.origin}${location.pathname}?${params.toString()}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast("已複製覆核連結到剪貼簿，傳給主管即可", "success");
+  } catch (e) {
+    prompt("複製這個連結傳給主管：", url);
+  }
 });
 
 function buildExportSnapshot() {
-  const project = document.getElementById("projectName").value || "未命名專案";
-  const total = +document.getElementById("totalScore").textContent;
-  const g = gradeOf(total);
-  const gradeColor = total >= 90 ? "#16a34a" : total >= 75 ? "#2563eb" : total >= 60 ? "#f59e0b" : "#dc2626";
+  const project = document.getElementById("projectName").value.trim() || "未命名素材";
+  const selfTotal = +document.getElementById("selfScore").textContent;
+  const supTotal = +document.getElementById("supScore").textContent;
+  const selfG = gradeOf(selfTotal);
+  const supG = gradeOf(supTotal);
   const date = new Date().toLocaleDateString("zh-TW");
 
   const wrapper = document.createElement("div");
@@ -562,7 +674,7 @@ function buildExportSnapshot() {
     "position:fixed",
     "top:0",
     "left:-20000px",
-    "width:880px",
+    "width:920px",
     "padding:28px",
     "background:#f5f6f8",
     'font-family:-apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", Arial, sans-serif',
@@ -570,48 +682,77 @@ function buildExportSnapshot() {
     "box-sizing:border-box",
   ].join(";");
 
+  const checkBox = (checked, color) => checked
+    ? `<span style="display:inline-block;width:16px;height:16px;background:${color};border:1.5px solid ${color};border-radius:3px;color:#fff;font-size:11px;line-height:14px;text-align:center;">&#10003;</span>`
+    : `<span style="display:inline-block;width:16px;height:16px;background:#fff;border:1.5px solid #cbd5e1;border-radius:3px;"></span>`;
+
   const catsHtml = data.map((cat, ci) => {
-    const catItems = cat.items.map((it, ii) => {
-      const checked = document.getElementById(`c${ci}_${ii}`).checked;
-      const rowBg = checked ? "" : "background:#fff7ed;border-left:3px solid #f59e0b;padding-left:9px;";
-      const labelStyle = checked
-        ? "color:#9ca3af;text-decoration:line-through;"
-        : "color:#1f2937;font-weight:500;";
-      const scoreColor = checked ? "#cbd5e1" : "#d97706";
-      const scoreWeight = checked ? "400" : "600";
-      const box = checked
-        ? '<span style="display:inline-block;width:16px;height:16px;background:#2563eb;border:1.5px solid #2563eb;border-radius:3px;color:#fff;font-size:11px;line-height:14px;text-align:center;">&#10003;</span>'
-        : '<span style="display:inline-block;width:16px;height:16px;background:#fff;border:1.5px solid #cbd5e1;border-radius:3px;"></span>';
-      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-top:1px solid #f1f3f5;${rowBg}">
-        ${box}
-        <span style="flex:1;font-size:13px;line-height:1.5;${labelStyle}">${it[0]}</span>
-        <span style="font-size:12px;color:${scoreColor};font-variant-numeric:tabular-nums;font-weight:${scoreWeight};">+${it[1]}</span>
+    const rows = cat.items.map((it, ii) => {
+      const self = document.getElementById(`self_${ci}_${ii}`).checked;
+      const sup = document.getElementById(`sup_${ci}_${ii}`).checked;
+      let rowStyle = "";
+      let labelStyle = "color:#1f2937;font-weight:500;";
+      let scoreColor = "#9ca3af";
+      let scoreWeight = "400";
+      if (self && sup) {
+        labelStyle = "color:#9ca3af;text-decoration:line-through;";
+        scoreColor = "#cbd5e1";
+      } else if (self && !sup) {
+        rowStyle = "background:#fef2f2;box-shadow:inset 3px 0 0 #dc2626;";
+        scoreColor = "#dc2626"; scoreWeight = "600";
+      } else {
+        rowStyle = "background:#fff7ed;box-shadow:inset 3px 0 0 #f59e0b;";
+        scoreColor = "#d97706"; scoreWeight = "600";
+      }
+      return `<div style="display:grid;grid-template-columns:48px 48px 1fr 48px;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid #f1f3f5;${rowStyle}">
+        <span style="text-align:center;">${checkBox(self, "#2563eb")}</span>
+        <span style="text-align:center;">${checkBox(sup, "#16a34a")}</span>
+        <span style="font-size:13px;line-height:1.5;${labelStyle}">${it[0]}</span>
+        <span style="text-align:right;font-size:12px;color:${scoreColor};font-variant-numeric:tabular-nums;font-weight:${scoreWeight};">+${it[1]}</span>
       </div>`;
     }).join("");
-    const catGot = cat.items.reduce((s, it, ii) => s + (document.getElementById(`c${ci}_${ii}`).checked ? it[1] : 0), 0);
+    const catSelf = cat.items.reduce((s, it, ii) => s + (document.getElementById(`self_${ci}_${ii}`).checked ? it[1] : 0), 0);
+    const catSup = cat.items.reduce((s, it, ii) => s + (document.getElementById(`sup_${ci}_${ii}`).checked ? it[1] : 0), 0);
     const catMax = cat.items.reduce((s, [, p]) => s + p, 0);
     return `<div style="background:#fff;border:1px solid #e3e6eb;border-radius:12px;margin-bottom:14px;overflow:hidden;">
-      <div style="padding:12px 16px;background:#fafbfc;border-bottom:1px solid #e3e6eb;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;">
-          <h3 style="margin:0;font-size:15px;color:#1f2937;">${cat.title}</h3>
-          <span style="color:#2563eb;font-weight:600;font-size:13px;font-variant-numeric:tabular-nums;">${catGot} / ${catMax}</span>
-        </div>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px;">${cat.desc}</div>
+      <div style="padding:12px 16px;background:#fafbfc;border-bottom:1px solid #e3e6eb;display:flex;justify-content:space-between;align-items:baseline;">
+        <h3 style="margin:0;font-size:15px;color:#1f2937;">${cat.title}</h3>
+        <span style="font-size:13px;font-variant-numeric:tabular-nums;">
+          <span style="color:#2563eb;font-weight:600;">${catSelf}</span><span style="color:#9ca3af;"> / ${catMax}</span>
+          <span style="color:#cbd5e1;margin:0 4px;">·</span>
+          <span style="color:#16a34a;font-weight:600;">${catSup}</span><span style="color:#9ca3af;"> / ${catMax}</span>
+        </span>
       </div>
-      ${catItems}
+      <div style="display:grid;grid-template-columns:48px 48px 1fr 48px;align-items:center;gap:10px;padding:6px 14px;background:#fafbfc;border-bottom:1px solid #e3e6eb;font-size:10px;color:#6b7280;font-weight:600;">
+        <span style="text-align:center;color:#2563eb;">自評</span>
+        <span style="text-align:center;color:#16a34a;">覆核</span>
+        <span>檢查項目</span>
+        <span style="text-align:right;">分數</span>
+      </div>
+      ${rows}
     </div>`;
   }).join("");
 
   wrapper.innerHTML = `
-    <div style="background:#fff;border:1px solid #e3e6eb;border-radius:12px;padding:20px 24px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end;">
-      <div>
-        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">${date}</div>
-        <h1 style="font-size:22px;margin:0;color:#1f2937;">${project}</h1>
-        <div style="font-size:13px;color:#6b7280;margin-top:4px;">內部平面設計審核評分表</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:44px;font-weight:700;color:${gradeColor};line-height:1;font-variant-numeric:tabular-nums;">${total}<span style="font-size:18px;color:#9ca3af;font-weight:400;"> / 100</span></div>
-        <div style="display:inline-block;margin-top:8px;padding:4px 14px;border-radius:999px;background:${g.bg};color:${gradeColor};font-size:13px;font-weight:600;">${g.label}・${g.desc}</div>
+    <div style="background:#fff;border:1px solid #e3e6eb;border-radius:12px;padding:20px 24px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:24px;">
+        <div>
+          <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">${date}</div>
+          <h1 style="font-size:22px;margin:0;color:#1f2937;">${project}</h1>
+          <div style="font-size:13px;color:#6b7280;margin-top:4px;">內部平面設計審核評分表</div>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:10px;padding:10px 16px;min-width:130px;text-align:center;">
+            <div style="font-size:11px;color:#2563eb;font-weight:600;letter-spacing:0.5px;">組員自評</div>
+            <div style="font-size:30px;font-weight:700;color:#2563eb;line-height:1.1;font-variant-numeric:tabular-nums;">${selfTotal}<span style="font-size:13px;color:#9ca3af;font-weight:400;"> / 100</span></div>
+            <div style="display:inline-block;margin-top:4px;padding:2px 10px;border-radius:999px;background:${selfG.bg};color:${selfG.color};font-size:11px;font-weight:600;">${selfG.label}</div>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #dcfce7;border-radius:10px;padding:10px 16px;min-width:130px;text-align:center;">
+            <div style="font-size:11px;color:#16a34a;font-weight:600;letter-spacing:0.5px;">主管覆核</div>
+            <div style="font-size:30px;font-weight:700;color:#16a34a;line-height:1.1;font-variant-numeric:tabular-nums;">${supTotal}<span style="font-size:13px;color:#9ca3af;font-weight:400;"> / 100</span></div>
+            <div style="display:inline-block;margin-top:4px;padding:2px 10px;border-radius:999px;background:${supG.bg};color:${supG.color};font-size:11px;font-weight:600;">${supG.label}</div>
+          </div>
+        </div>
       </div>
     </div>
     ${catsHtml}
@@ -620,6 +761,7 @@ function buildExportSnapshot() {
 }
 
 document.getElementById("exportImageBtn").addEventListener("click", async () => {
+  if (!validateProject("下載結果為圖檔")) return;
   const btn = document.getElementById("exportImageBtn");
   const original = btn.textContent;
   btn.textContent = "產生圖片中…";
@@ -630,8 +772,8 @@ document.getElementById("exportImageBtn").addEventListener("click", async () => 
       alert("圖片產生器尚未載入（可能網路較慢或被擋），請重新整理頁面後再試。");
       return;
     }
-    const project = document.getElementById("projectName").value || "未命名專案";
-    const total = document.getElementById("totalScore").textContent;
+    const project = document.getElementById("projectName").value.trim();
+    const supTotal = document.getElementById("supScore").textContent;
     snapshot = buildExportSnapshot();
     document.body.appendChild(snapshot);
     await new Promise(r => setTimeout(r, 100));
@@ -642,8 +784,9 @@ document.getElementById("exportImageBtn").addEventListener("click", async () => 
     });
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.download = `設計評分_${project}_${total}分.png`;
+    a.download = `設計評分_${project}_${supTotal}分.png`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast("圖檔已下載", "success");
   } catch (e) {
     console.error(e);
     alert("產生圖片失敗：" + (e && e.message ? e.message : e));
@@ -654,7 +797,7 @@ document.getElementById("exportImageBtn").addEventListener("click", async () => 
   }
 });
 
-load();
+if (!loadFromURL()) loadLocal();
 recalc();
 </script>
 </body>
