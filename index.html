@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>內部平面設計審核評分表</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e3e6eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --good: #16a34a;
+    --ok: #2563eb;
+    --warn: #f59e0b;
+    --bad: #dc2626;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 24px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static !important; }
+  }
+  header.page-header {
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+  }
+  header.page-header h1 {
+    font-size: 24px;
+    margin: 0 0 6px;
+    letter-spacing: 0.5px;
+  }
+  header.page-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .toolbar {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #f3f4f6; }
+  .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #1d4ed8; }
+  .input {
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 200px;
+  }
+  .category {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .category-header {
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #fafbfc, #f4f6f8);
+    border-bottom: 1px solid var(--border);
+  }
+  .category-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .category-meta {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .category-progress {
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 28px 1fr 44px;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 18px;
+    border-top: 1px solid #f1f3f5;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .item:first-of-type { border-top: 0; }
+  .item:hover { background: #fafbfc; }
+  .item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+  }
+  .item-label {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .item.checked {
+    background: #fafbfc;
+  }
+  .item.checked .item-label {
+    color: #b6bcc4;
+    text-decoration: line-through;
+    text-decoration-color: #d1d5db;
+  }
+  .item.checked .item-score { color: #c7cbd1; }
+  .item.unchecked .item-label {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .item.unchecked {
+    background: #fff7ed;
+    border-left: 3px solid #f59e0b;
+  }
+  .item.unchecked:hover { background: #ffedd5; }
+  .item-score {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .item.unchecked .item-score { color: #d97706; font-weight: 600; }
+  .sidebar {
+    position: sticky;
+    top: 20px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .score-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .score-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  .score-value {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .score-suffix {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .progress-bar {
+    height: 8px;
+    background: #eef0f3;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.25s ease, background 0.25s ease;
+  }
+  .grade-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 14px;
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+  .grade-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .info-card h3 {
+    font-size: 14px;
+    margin: 0 0 10px;
+    color: var(--text);
+  }
+  .info-card ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .grade-table { width: 100%; font-size: 13px; }
+  .grade-table td { padding: 4px 0; vertical-align: top; }
+  .grade-table td:first-child {
+    color: var(--text);
+    font-weight: 600;
+    white-space: nowrap;
+    padding-right: 10px;
+  }
+  .grade-table td:last-child { color: var(--muted); }
+  .danger-list li { color: var(--bad); }
+  .meta-input {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  details.usage {
+    grid-column: 1 / -1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: var(--shadow);
+    margin-top: 8px;
+  }
+  details.usage summary {
+    padding: 14px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+  }
+  details.usage summary::-webkit-details-marker { display: none; }
+  details.usage summary::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform 0.2s;
+  }
+  details.usage[open] summary::before { transform: rotate(90deg); }
+  details.usage .usage-body {
+    padding: 0 18px 18px;
+    font-size: 14px;
+    color: var(--text);
+  }
+  details.usage h4 {
+    margin: 16px 0 6px;
+    font-size: 14px;
+  }
+  details.usage table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  details.usage td { padding: 4px 8px 4px 0; vertical-align: top; }
+  details.usage td:first-child { color: var(--primary); font-weight: 600; white-space: nowrap; }
+  @media print {
+    .toolbar, .sidebar { display: none; }
+    .layout { display: block; }
+    .item { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <header class="page-header">
+    <h1>內部平面設計審核評分表</h1>
+    <p>起始分數 0 分，每勾選一項即累計該項分數，總分 100 分。請依下方項目逐一檢視設計稿。</p>
+  </header>
+
+  <div class="toolbar">
+    <input id="projectName" class="input" placeholder="專案名稱（選填）">
+    <button class="btn" id="checkAll">全部勾選</button>
+    <button class="btn" id="uncheckAll">全部取消</button>
+    <button class="btn btn-primary" id="exportImageBtn">下載結果為圖檔</button>
+    <button class="btn" id="exportBtn">匯出 TXT</button>
+    <button class="btn" onclick="window.print()">列印 / 存 PDF</button>
+  </div>
+
+  <main id="categories"></main>
+
+  <aside class="sidebar">
+    <div class="score-card">
+      <p class="score-label">最終得分</p>
+      <div>
+        <span class="score-value" id="totalScore">0</span>
+        <span class="score-suffix">/ 100</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div>
+        <span class="grade-badge" id="gradeBadge">—</span>
+      </div>
+      <div class="grade-desc" id="gradeDesc">尚未開始評分</div>
+    </div>
+
+    <div class="info-card">
+      <h3>等級判定</h3>
+      <table class="grade-table">
+        <tr><td>90–100 分</td><td>優：可直接交付</td></tr>
+        <tr><td>75–89 分</td><td>良：小幅修改即可交付</td></tr>
+        <tr><td>60–74 分</td><td>普：中度修改，需局部大修</td></tr>
+        <tr><td>低於 60 分</td><td>不佳：整體退件重做</td></tr>
+      </table>
+    </div>
+
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const data = [
+  {
+    title: "一、版面結構與視覺動線",
+    desc: "確認版面安排讓讀者看得順、看得舒服，能馬上掌握重點",
+    items: [
+      ["資訊層級是否分明（標題 > 副標 > 內文 > 註解）", 5],
+      ["閱讀動線是否順暢（Z 字型／F 字型）", 5],
+      ["相鄰資訊是否清晰分組（同組靠近、異組分開）", 3],
+      ["資訊密度是否平均（沒有某區塞滿、某區空蕩）", 3],
+      ["留白是否足夠（版面不擁擠、不壓迫）", 3],
+      ["排版是否對齊（至少 3 個元素共用對齊線）", 3],
+      ["CTA 是否足夠清楚（顏色、大小、留白突出）", 3],
+    ],
+  },
+  {
+    title: "二、版面設計感與目的性",
+    desc: "確認版面看起來有設計過，且合乎主題（避免亂塞、填空式設計）",
+    items: [
+      ["版面是否能畫出明確的區塊結構邏輯（例：主標區、內文區、主視覺區…等）", 3],
+      ["每個 ICON／裝飾元素是否都有功能性理由", 5],
+      ["同類元素是否有一致性處理（例：同一版面的卡片、區塊小標題、ICON，大小、配色、風格一致）", 5],
+      ["是否有明確的主角區與配角區（版面有節奏與層次）", 3],
+      ["背景是否克制（無過多紋理、光暈、漸層搶走主視覺）", 3],
+      ["是否避免過度框線／色塊（不要每個區塊都被框起來）", 3],
+    ],
+  },
+  {
+    title: "三、主視覺與素材",
+    desc: "確認視覺元素運用適當，且有一致性",
+    items: [
+      ["主視覺元素是否有足夠份量（或有重複視覺元素作為主視覺）", 5],
+      ["素材選用是否合乎主題（是否能在 3 秒內傳達核心訊息或呈現主題意象）", 5],
+      ["素材風格是否符合品牌／主題調性", 5],
+      ["ICON、插圖風格是否一致（無扁平／手繪混用、外框粗細一致）", 5],
+      ["圖片解析度／品質是否足夠（不模糊、不變形）", 3],
+      ["圖片裁切是否合理（人物頭部、重要元素未被切到）", 2],
+    ],
+  },
+  {
+    title: "四、色彩與文字設計",
+    desc: "確認色彩、字體運用適當",
+    items: [
+      ["色調是否符合品牌／主題調性", 3],
+      ["主色、輔色、強調色是否和諧（建議比例 6:3:1）", 3],
+      ["色彩數量是否克制（主+輔+強調 ≤ 5 色）", 3],
+      ["字體選擇是否符合品牌／主題調性", 2],
+      ["文字與背景對比度是否足夠（可讀性）", 2],
+      ["強調色是否真的有強調效果（沒有被濫用）", 2],
+    ],
+  },
+  {
+    title: "五、文字內容品質",
+    desc: "確認資訊的正確性，且能精準傳達",
+    items: [
+      ["文案長度是否適合", 2],
+      ["是否有重複性、多餘的文字或句子", 2],
+      ["文字資訊正確且無錯字", 5],
+      ["CTA 文案是否具體（例如：「立即報名」優於「了解更多」）", 2],
+      ["數字、英文與中文之間是否有盤古之白", 2],
+    ],
+  },
+];
+
+const STORAGE_KEY = "design-review-state-v2";
+
+const root = document.getElementById("categories");
+data.forEach((cat, ci) => {
+  const catEl = document.createElement("section");
+  catEl.className = "category";
+  const catMax = cat.items.reduce((s, [, p]) => s + p, 0);
+  catEl.innerHTML = `
+    <div class="category-header">
+      <h2 class="category-title">
+        <span>${cat.title}</span>
+        <span class="category-progress" data-cat="${ci}">0 / ${catMax}</span>
+      </h2>
+      <div class="category-meta">${cat.desc}</div>
+    </div>
+  `;
+  cat.items.forEach(([label, score], ii) => {
+    const id = `c${ci}_${ii}`;
+    const row = document.createElement("label");
+    row.className = "item unchecked";
+    row.htmlFor = id;
+    row.innerHTML = `
+      <input type="checkbox" id="${id}" data-cat="${ci}" data-score="${score}">
+      <span class="item-label">${label}</span>
+      <span class="item-score">+${score}</span>
+    `;
+    catEl.appendChild(row);
+  });
+  root.appendChild(catEl);
+});
+
+const checkboxes = () => Array.from(document.querySelectorAll('input[type="checkbox"][data-score]'));
+
+function gradeOf(score) {
+  if (score >= 90) return { label: "優", desc: "可直接交付", color: "var(--good)", bg: "#dcfce7" };
+  if (score >= 75) return { label: "良", desc: "小幅修改即可交付", color: "var(--ok)", bg: "#dbeafe" };
+  if (score >= 60) return { label: "普", desc: "中度修改，需局部大修", color: "var(--warn)", bg: "#fef3c7" };
+  return { label: "不佳", desc: "整體退件重做", color: "var(--bad)", bg: "#fee2e2" };
+}
+
+function recalc() {
+  let total = 0;
+  const catTotals = data.map(c => ({ got: 0, max: c.items.reduce((s, [, p]) => s + p, 0) }));
+  checkboxes().forEach(cb => {
+    const ci = +cb.dataset.cat;
+    const sc = +cb.dataset.score;
+    const row = cb.closest(".item");
+    if (cb.checked) {
+      total += sc;
+      catTotals[ci].got += sc;
+      row.classList.add("checked");
+      row.classList.remove("unchecked");
+    } else {
+      row.classList.add("unchecked");
+      row.classList.remove("checked");
+    }
+  });
+  document.getElementById("totalScore").textContent = total;
+  const fill = document.getElementById("progressFill");
+  fill.style.width = total + "%";
+  const g = gradeOf(total);
+  fill.style.background = g.color;
+  const badge = document.getElementById("gradeBadge");
+  badge.textContent = `${g.label}（${total} 分）`;
+  badge.style.background = g.bg;
+  badge.style.color = g.color;
+  document.getElementById("gradeDesc").textContent = g.desc;
+  document.querySelectorAll(".category-progress").forEach(el => {
+    const ci = +el.dataset.cat;
+    el.textContent = `${catTotals[ci].got} / ${catTotals[ci].max}`;
+  });
+  save();
+}
+
+function save() {
+  const state = {
+    project: document.getElementById("projectName").value,
+    checks: checkboxes().map(cb => cb.checked),
+  };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    document.getElementById("projectName").value = state.project || "";
+    const cbs = checkboxes();
+    (state.checks || []).forEach((v, i) => { if (cbs[i]) cbs[i].checked = v; });
+  } catch (e) {}
+}
+
+document.addEventListener("change", e => {
+  if (e.target.matches('input[type="checkbox"][data-score]')) recalc();
+});
+document.getElementById("projectName").addEventListener("input", save);
+document.getElementById("reviewer").addEventListener("input", save);
+document.getElementById("checkAll").addEventListener("click", () => {
+  checkboxes().forEach(cb => cb.checked = true); recalc();
+});
+document.getElementById("uncheckAll").addEventListener("click", () => {
+  checkboxes().forEach(cb => cb.checked = false); recalc();
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const project = document.getElementById("projectName").value || "未命名專案";
+  const reviewer = document.getElementById("reviewer").value || "未填寫";
+  const total = document.getElementById("totalScore").textContent;
+  const g = gradeOf(+total);
+  const date = new Date().toLocaleString("zh-TW");
+  const lines = [
+    `平面設計評分結果`,
+    `============================`,
+    `專案：${project}`,
+    `審核人：${reviewer}`,
+    `日期：${date}`,
+    ``,
+    `最終得分：${total} / 100`,
+    `等級判定：${g.label}（${g.desc}）`,
+    ``,
+    `--- 明細 ---`,
+  ];
+  data.forEach((cat, ci) => {
+    lines.push("");
+    lines.push(`【${cat.title}】`);
+    cat.items.forEach((it, ii) => {
+      const cb = document.getElementById(`c${ci}_${ii}`);
+      const mark = cb.checked ? "[V]" : "[ ]";
+      lines.push(`${mark} ${it[0]}  (+${it[1]})`);
+    });
+  });
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `設計評分_${project}_${total}分.txt`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("exportImageBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("exportImageBtn");
+  const original = btn.textContent;
+  btn.textContent = "產生圖片中…";
+  btn.disabled = true;
+  try {
+    if (typeof html2canvas !== "function") {
+      alert("圖片產生器尚未載入完成，請檢查網路連線後再試。");
+      return;
+    }
+    const project = document.getElementById("projectName").value || "未命名專案";
+    const total = document.getElementById("totalScore").textContent;
+    const toolbar = document.querySelector(".toolbar");
+    const layout = document.querySelector(".layout");
+    toolbar.style.visibility = "hidden";
+    toolbar.style.position = "absolute";
+    const canvas = await html2canvas(layout, {
+      backgroundColor: "#f5f6f8",
+      scale: 2,
+      useCORS: true,
+      windowWidth: layout.scrollWidth,
+    });
+    toolbar.style.visibility = "";
+    toolbar.style.position = "";
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `設計評分_${project}_${total}分.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, "image/png");
+  } catch (e) {
+    alert("產生圖片失敗：" + e.message);
+  } finally {
+    btn.textContent = original;
+    btn.disabled = false;
+  }
+});
+
+load();
+recalc();
+</script>
+</body>
+</html>
