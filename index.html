@@ -347,7 +347,7 @@
   </aside>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <script>
 const data = [
   {
@@ -553,41 +553,105 @@ document.getElementById("exportBtn").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
+function buildExportSnapshot() {
+  const project = document.getElementById("projectName").value || "未命名專案";
+  const total = +document.getElementById("totalScore").textContent;
+  const g = gradeOf(total);
+  const gradeColor = total >= 90 ? "#16a34a" : total >= 75 ? "#2563eb" : total >= 60 ? "#f59e0b" : "#dc2626";
+  const date = new Date().toLocaleDateString("zh-TW");
+
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = [
+    "position:fixed",
+    "top:0",
+    "left:-20000px",
+    "width:880px",
+    "padding:28px",
+    "background:#f5f6f8",
+    'font-family:-apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", Arial, sans-serif',
+    "color:#1f2937",
+    "box-sizing:border-box",
+  ].join(";");
+
+  const catsHtml = data.map((cat, ci) => {
+    const catItems = cat.items.map((it, ii) => {
+      const checked = document.getElementById(`c${ci}_${ii}`).checked;
+      const rowBg = checked ? "" : "background:#fff7ed;border-left:3px solid #f59e0b;padding-left:9px;";
+      const labelStyle = checked
+        ? "color:#9ca3af;text-decoration:line-through;"
+        : "color:#1f2937;font-weight:500;";
+      const scoreColor = checked ? "#cbd5e1" : "#d97706";
+      const scoreWeight = checked ? "400" : "600";
+      const box = checked
+        ? '<span style="display:inline-block;width:16px;height:16px;background:#2563eb;border:1.5px solid #2563eb;border-radius:3px;color:#fff;font-size:11px;line-height:14px;text-align:center;">&#10003;</span>'
+        : '<span style="display:inline-block;width:16px;height:16px;background:#fff;border:1.5px solid #cbd5e1;border-radius:3px;"></span>';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-top:1px solid #f1f3f5;${rowBg}">
+        ${box}
+        <span style="flex:1;font-size:13px;line-height:1.5;${labelStyle}">${it[0]}</span>
+        <span style="font-size:12px;color:${scoreColor};font-variant-numeric:tabular-nums;font-weight:${scoreWeight};">+${it[1]}</span>
+      </div>`;
+    }).join("");
+    const catGot = cat.items.reduce((s, it, ii) => s + (document.getElementById(`c${ci}_${ii}`).checked ? it[1] : 0), 0);
+    const catMax = cat.items.reduce((s, [, p]) => s + p, 0);
+    return `<div style="background:#fff;border:1px solid #e3e6eb;border-radius:12px;margin-bottom:14px;overflow:hidden;">
+      <div style="padding:12px 16px;background:#fafbfc;border-bottom:1px solid #e3e6eb;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <h3 style="margin:0;font-size:15px;color:#1f2937;">${cat.title}</h3>
+          <span style="color:#2563eb;font-weight:600;font-size:13px;font-variant-numeric:tabular-nums;">${catGot} / ${catMax}</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px;">${cat.desc}</div>
+      </div>
+      ${catItems}
+    </div>`;
+  }).join("");
+
+  wrapper.innerHTML = `
+    <div style="background:#fff;border:1px solid #e3e6eb;border-radius:12px;padding:20px 24px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">${date}</div>
+        <h1 style="font-size:22px;margin:0;color:#1f2937;">${project}</h1>
+        <div style="font-size:13px;color:#6b7280;margin-top:4px;">內部平面設計審核評分表</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:44px;font-weight:700;color:${gradeColor};line-height:1;font-variant-numeric:tabular-nums;">${total}<span style="font-size:18px;color:#9ca3af;font-weight:400;"> / 100</span></div>
+        <div style="display:inline-block;margin-top:8px;padding:4px 14px;border-radius:999px;background:${g.bg};color:${gradeColor};font-size:13px;font-weight:600;">${g.label}・${g.desc}</div>
+      </div>
+    </div>
+    ${catsHtml}
+  `;
+  return wrapper;
+}
+
 document.getElementById("exportImageBtn").addEventListener("click", async () => {
   const btn = document.getElementById("exportImageBtn");
   const original = btn.textContent;
   btn.textContent = "產生圖片中…";
   btn.disabled = true;
+  let snapshot = null;
   try {
-    if (typeof html2canvas !== "function") {
-      alert("圖片產生器尚未載入完成，請檢查網路連線後再試。");
+    if (typeof htmlToImage === "undefined") {
+      alert("圖片產生器尚未載入（可能網路較慢或被擋），請重新整理頁面後再試。");
       return;
     }
     const project = document.getElementById("projectName").value || "未命名專案";
     const total = document.getElementById("totalScore").textContent;
-    const toolbar = document.querySelector(".toolbar");
-    const layout = document.querySelector(".layout");
-    toolbar.style.visibility = "hidden";
-    toolbar.style.position = "absolute";
-    const canvas = await html2canvas(layout, {
+    snapshot = buildExportSnapshot();
+    document.body.appendChild(snapshot);
+    await new Promise(r => setTimeout(r, 100));
+    const dataUrl = await htmlToImage.toPng(snapshot, {
       backgroundColor: "#f5f6f8",
-      scale: 2,
-      useCORS: true,
-      windowWidth: layout.scrollWidth,
+      pixelRatio: 2,
+      cacheBust: true,
     });
-    toolbar.style.visibility = "";
-    toolbar.style.position = "";
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `設計評分_${project}_${total}分.png`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, "image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `設計評分_${project}_${total}分.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
   } catch (e) {
-    alert("產生圖片失敗：" + e.message);
+    console.error(e);
+    alert("產生圖片失敗：" + (e && e.message ? e.message : e));
   } finally {
+    if (snapshot && snapshot.parentNode) snapshot.parentNode.removeChild(snapshot);
     btn.textContent = original;
     btn.disabled = false;
   }
