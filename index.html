@@ -671,9 +671,6 @@ function buildExportSnapshot() {
 
   const wrapper = document.createElement("div");
   wrapper.style.cssText = [
-    "position:fixed",
-    "top:0",
-    "left:-20000px",
     "width:920px",
     "padding:28px",
     "background:#f5f6f8",
@@ -766,7 +763,7 @@ document.getElementById("exportImageBtn").addEventListener("click", async () => 
   const original = btn.textContent;
   btn.textContent = "產生圖片中…";
   btn.disabled = true;
-  let snapshot = null;
+  let hider = null;
   try {
     if (typeof htmlToImage === "undefined") {
       alert("圖片產生器尚未載入（可能網路較慢或被擋），請重新整理頁面後再試。");
@@ -774,13 +771,18 @@ document.getElementById("exportImageBtn").addEventListener("click", async () => 
     }
     const project = document.getElementById("projectName").value.trim();
     const supTotal = document.getElementById("supScore").textContent;
-    snapshot = buildExportSnapshot();
-    document.body.appendChild(snapshot);
-    await new Promise(r => setTimeout(r, 100));
+    const snapshot = buildExportSnapshot();
+    hider = document.createElement("div");
+    hider.style.cssText = "position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;pointer-events:none;z-index:-9999;";
+    hider.appendChild(snapshot);
+    document.body.appendChild(hider);
+    await new Promise(r => setTimeout(r, 150));
     const dataUrl = await htmlToImage.toPng(snapshot, {
       backgroundColor: "#f5f6f8",
       pixelRatio: 2,
       cacheBust: true,
+      width: 920,
+      height: snapshot.scrollHeight,
     });
     const a = document.createElement("a");
     a.href = dataUrl;
@@ -791,7 +793,7 @@ document.getElementById("exportImageBtn").addEventListener("click", async () => 
     console.error(e);
     alert("產生圖片失敗：" + (e && e.message ? e.message : e));
   } finally {
-    if (snapshot && snapshot.parentNode) snapshot.parentNode.removeChild(snapshot);
+    if (hider && hider.parentNode) hider.parentNode.removeChild(hider);
     btn.textContent = original;
     btn.disabled = false;
   }
